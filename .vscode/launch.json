@@ -1,0 +1,57 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "showDevDebugOutput":true,
+    "configurations": [
+        {
+            "name": "Debug blinky",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "device": "STM32H723ZG",
+            "interface": "swd",
+            "cwd": "${workspaceRoot}",
+            "executable": "application/build/zephyr/zephyr.elf",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H723.svd",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "main",
+        },
+        {
+            "name": "Debug dhcp",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "device": "STM32H723ZG",
+            "interface": "swd",
+            "cwd": "${workspaceRoot}",
+            "executable": "zephyr/samples/net/dhcpv4_client/build/zephyr/zephyr.elf",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H723.svd",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "",
+            "postRestartCommands": [
+                "continue"
+            ],
+        },
+        {
+            "name": "Debug http_server",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "device": "STM32H723ZG",
+            "interface": "swd",
+            "cwd": "${workspaceRoot}",
+            "executable": "zephyr/samples/net/sockets/http_server/build/zephyr/zephyr.elf",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H723.svd",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "",
+            "postRestartCommands": [
+                "continue"
+            ],
+        }
+    ]
+}

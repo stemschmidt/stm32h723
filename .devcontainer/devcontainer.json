@@ -1,0 +1,38 @@
+//devcontainer.json
+{
+    "name": "Zephyr Dev Environment",
+    "image": "zephyrprojectrtos/zephyr-build:v0.29.2",
+    "postStartCommand": "/bin/bash",
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "twxs.cmake",
+                "ms-python.python",
+                "mcu-debug.debug-tracker-vscode",
+                "mcu-debug.memory-view",
+                "mcu-debug.rtos-views",
+                "mcu-debug.peripheral-viewer",
+                "marus25.cortex-debug"
+            ],
+            "settings": {
+                "terminal.integrated.profiles.linux": {
+                    "bash": {
+                        "path": "bash",
+                        "icon": "terminal-bash"
+                    }
+                }
+            }
+        }
+    },
+
+    "remoteUser": "user",
+
+    "runArgs": [
+        "--network=host",
+        "--rm"
+    ]
+}
+  

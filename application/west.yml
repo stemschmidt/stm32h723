@@ -1,0 +1,29 @@
+manifest:
+  # This west.yml requires west 0.12s or later, because the "import"
+  # feature used below was introduced then.
+  version: 0.12
+
+  # "projects" is a list of git repositories which make up the project
+  projects:
+    - name: zephyr
+      url: https://github.com/zephyrproject-rtos/zephyr.git
+      revision: v4.4.0
+      import:
+        name-allowlist: # select what we need
+          - cmsis
+          - cmsis_6
+          - hal_stm32
+          - mbedtls
+          - mbedtls-3.6
+          - mcuboot
+          - segger
+          - tf-psa-crypto
+          - zephyr
+    - name: cmsis-svd-data
+      url: https://github.com/cmsis-svd/cmsis-svd-data.git
+      path: modules/debug/cmsis-svd
+      revision: main
+
+  self:
+    # This repository should be cloned to application.
+    path: application
