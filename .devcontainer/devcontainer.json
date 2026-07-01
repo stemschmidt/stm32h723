@@ -2,7 +2,6 @@
 {
     "name": "Zephyr Dev Environment",
     "image": "zephyrprojectrtos/zephyr-build:v0.29.2",
-    "postStartCommand": "/bin/bash",
 
     "customizations": {
         "vscode": {
@@ -18,10 +17,13 @@
                 "marus25.cortex-debug"
             ],
             "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
                 "terminal.integrated.profiles.linux": {
                     "bash": {
-                        "path": "bash",
-                        "icon": "terminal-bash"
+                        "path": "/bin/bash",
+                        "args": [
+                            "-l"
+                        ]
                     }
                 }
             }
