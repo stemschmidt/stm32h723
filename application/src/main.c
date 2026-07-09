@@ -1,39 +1,28 @@
-#include <zephyr/device.h>
-#include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/led.h>
 #include <zephyr/kernel.h>
-#include <zephyr/logging/log.h>
 
-#define LED0_NODE DT_ALIAS(led0)
+/* 1000 msec = 1 sec */
+#define SLEEP_TIME_MS 1000
 
-/*
- * A build error on this line means your board is unsupported.
- * See the sample documentation for information on how to fix this.
- */
-static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
-
-LOG_MODULE_REGISTER(main);
-/* The devicetree node identifier for the "led0" alias. */
+const struct device* leds = DEVICE_DT_GET(DT_NODELABEL(leds));
 
 int main(void) {
-  int ret = 0;
+    bool led_state = true;
 
-  if (!device_is_ready(led.port)) {
-    return -1;
-  }
-
-  ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_LOW);
-  if (ret < 0) {
-    return -1;
-  }
-
-  while (1) {
-    ret = gpio_pin_toggle_dt(&led);
-    if (ret < 0) {
-      return -1;
+    if (!device_is_ready(leds)) {
+        return -1;
     }
-    LOG_INF(".");
-    k_msleep(500);
-  }
 
-  return 0;
+    while (1) {
+        if (led_state == true) {
+            led_on(leds, 0);
+        } else {
+            led_off(leds, 0);
+        }
+        led_state = !led_state;
+        printf("LED state: %s\n", led_state ? "ON" : "OFF");
+        k_msleep(SLEEP_TIME_MS);
+    }
+
+    return 0;
 }

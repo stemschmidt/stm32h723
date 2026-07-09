@@ -6,7 +6,7 @@
     "showDevDebugOutput":true,
     "configurations": [
         {
-            "name": "Debug blinky",
+            "name": "Debug application",
             "type": "cortex-debug",
             "request": "launch",
             "servertype": "external",
@@ -15,9 +15,65 @@
             "interface": "swd",
             "cwd": "${workspaceRoot}",
             "executable": "application/build/zephyr/zephyr.elf",
-            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H723.svd",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
             "rtos": "Zephyr",
             "runToEntryPoint": "main",
+        },
+        {
+            "name": "Debug blinky",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "device": "STM32H723ZG",
+            "interface": "swd",
+            "cwd": "${workspaceRoot}",
+            "executable": "zephyr/samples/basic/blinky/build/zephyr/zephyr.elf",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "main",
+        },
+        {
+            "name": "Debug led pwm",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "device": "STM32H723ZG",
+            "interface": "swd",
+            "cwd": "${workspaceRoot}",
+            "executable": "zephyr/samples/drivers/led/pwm/build/zephyr/zephyr.elf",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "main",
+        },
+        {
+            "name": "Debug blinky on native-sim",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/workspaces/stm32h723/zephyr/samples/basic/blinky/build/zephyr/zephyr.exe",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                },
+                {
+                    "text": "-gdb-set inferior-tty",
+                    "ignoreFailures": true
+                }
+            ]
         },
         {
             "name": "Debug dhcp",
@@ -29,7 +85,7 @@
             "interface": "swd",
             "cwd": "${workspaceRoot}",
             "executable": "zephyr/samples/net/dhcpv4_client/build/zephyr/zephyr.elf",
-            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H723.svd",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
             "rtos": "Zephyr",
             "runToEntryPoint": "",
             "postRestartCommands": [
@@ -46,7 +102,7 @@
             "interface": "swd",
             "cwd": "${workspaceRoot}",
             "executable": "zephyr/samples/net/sockets/http_server/build/zephyr/zephyr.elf",
-            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H723.svd",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
             "rtos": "Zephyr",
             "runToEntryPoint": "",
             "postRestartCommands": [
