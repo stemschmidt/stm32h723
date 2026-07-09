@@ -1,8 +1,12 @@
 #include <zephyr/drivers/led.h>
 #include <zephyr/kernel.h>
+#include <zephyr/sys/reboot.h>
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS 1000
+
+static volatile unsigned int crash_reason = 0;
+static volatile unsigned int violating_address = 0;
 
 const struct device* leds = DEVICE_DT_GET(DT_NODELABEL(leds));
 
@@ -16,10 +20,8 @@ const struct device* leds = DEVICE_DT_GET(DT_NODELABEL(leds));
   zephyr/include/zephyr/arch/arm/arch.h (architecture specific errors)
 */
 void k_sys_fatal_error_handler(unsigned int reason, const struct arch_esf* esf) {
-    core_dump.reason = reason;
-    core_dump.violating_address = esf->basic.pc;
-
-    persistent_storage_set_simple_coredump(&core_dump);
+    crash_reason = reason;
+    violating_address = esf->basic.pc;
 
 /* If we have build with CONFIG_THREAD_ANALYZER to analyze stack usage, run into a breakpoint. */
 #if defined(CONFIG_THREAD_ANALYZER)
