@@ -6,6 +6,35 @@
 
 const struct device* leds = DEVICE_DT_GET(DT_NODELABEL(leds));
 
+/*
+  pc in esf contains the address where the issue occured. Use
+  "/opt/toolchains/zephyr-sdk-1.0.1/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-addr2line -e build/zephyr/zephyr.elf
+  0x12345678" (address in pc) to find the violating instruction.
+
+  parameter reason:
+  zephyr/include/zephyr/fatal_types.h (OS errors)
+  zephyr/include/zephyr/arch/arm/arch.h (architecture specific errors)
+*/
+void k_sys_fatal_error_handler(unsigned int reason, const struct arch_esf* esf) {
+    core_dump.reason = reason;
+    core_dump.violating_address = esf->basic.pc;
+
+    persistent_storage_set_simple_coredump(&core_dump);
+
+/* If we have build with CONFIG_THREAD_ANALYZER to analyze stack usage, run into a breakpoint. */
+#if defined(CONFIG_THREAD_ANALYZER)
+    if (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) {
+        __asm__ volatile("bkpt #0");
+    }
+
+    while (1) {
+        k_cpu_idle();
+    }
+#else
+    sys_reboot(SYS_REBOOT_COLD);
+#endif
+}
+
 int main(void) {
     bool led_state = true;
 
