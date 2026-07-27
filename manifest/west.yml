@@ -25,5 +25,5 @@ manifest:
       revision: main
 
   self:
-    # This repository should be cloned to application.
-    path: application
+    # This repository should be cloned to manifest.
+    path: manifest
