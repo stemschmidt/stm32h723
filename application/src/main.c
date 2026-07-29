@@ -2,14 +2,17 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/reboot.h>
 
+#define USE_CUSTOM_ERROR_HANDLER 0
+#define DEBUG_FATAL_ERROR_HANDLER 0
+
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS 1000
 
-static volatile unsigned int crash_reason = 0;
-static volatile unsigned int violating_address = 0;
-
 const struct device* leds = DEVICE_DT_GET(DT_NODELABEL(leds));
-
+#if USE_CUSTOM_ERROR_HANDLER
+static volatile unsigned int fatal_error_reason = 0;
+static volatile unsigned int fatal_error_pc = 0;
+static volatile unsigned int fatal_error_lr = 0;
 /*
   pc in esf contains the address where the issue occured. Use
   "/opt/toolchains/zephyr-sdk-1.0.1/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-addr2line -e build/zephyr/zephyr.elf
@@ -20,8 +23,9 @@ const struct device* leds = DEVICE_DT_GET(DT_NODELABEL(leds));
   zephyr/include/zephyr/arch/arm/arch.h (architecture specific errors)
 */
 void k_sys_fatal_error_handler(unsigned int reason, const struct arch_esf* esf) {
-    crash_reason = reason;
-    violating_address = esf->basic.pc;
+    fatal_error_reason = reason;
+    fatal_error_pc = esf->basic.pc;
+    fatal_error_lr = esf->basic.lr;
 
 /* If we have build with CONFIG_THREAD_ANALYZER to analyze stack usage, run into a breakpoint. */
 #if defined(CONFIG_THREAD_ANALYZER)
@@ -36,6 +40,21 @@ void k_sys_fatal_error_handler(unsigned int reason, const struct arch_esf* esf) 
     sys_reboot(SYS_REBOOT_COLD);
 #endif
 }
+#endif
+
+#if DEBUG_FATAL_ERROR_HANDLER
+#define STACK_OVERFLOW_ARRAY 4096
+static void stack_overflow(void) {
+    volatile uint8_t dummy[STACK_OVERFLOW_ARRAY];
+    for (int i = 0; i < STACK_OVERFLOW_ARRAY; i++) {
+        dummy[i] = i;
+    }
+}
+
+static void invalid_read(void) { volatile uint32_t x = *(volatile uint32_t*)0xFFFFFFFF; }
+
+static void invalid_write(void) { *(volatile uint32_t*)0xFFFFFFFF = 0; }
+#endif
 
 int main(void) {
     bool led_state = true;
