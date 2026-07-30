@@ -1,17 +1,19 @@
 Initial test of development setup
 To verify that the docker container runs and has access to the debugger on the host:
-1. >git clone git@github.com:stemschmidt/stm32h723.git
-2. >cd stm32h723
-3. >code .
-4. Select "Reopen in Container" in popup, wait for everything to settle
-5. Select "Reload Window" if popup appears
-6. Connect nucleo-h723zg board to USB port of the host
-7. Launch openocd with stm32h723zg_openocd.cfg (see below for wsl2 setup)
-8. In VSCode select "Run and Debug" on the left (or Ctrl + Shift + D)
-9. Select "Test environment" from the launch drop-down menu
-10. Select "Start Debugging" (or F5)
-11. Select "Continue" (or F5)
-12. Verify that LED1 is blinking with 0.5 Hz
+1. Launch Ubuntu via wsl2
+2. Move to the directory in which you want to place the repository
+3. >git clone git@github.com:stemschmidt/stm32h723.git
+4. >cd stm32h723
+5. >code .
+6. Wait for VSCode to start and select "Reopen in Container" in popup, wait for everything to settle
+7. Select "Reload Window" if popup appears
+8. Connect nucleo-h723zg board to USB port of the host
+9. Launch openocd with stm32h723zg_openocd.cfg (see below: "Launch openocd")
+10. In VSCode select "Run and Debug" on the left (or Ctrl + Shift + D)
+11. Select "Test environment" from the launch drop-down menu
+12. Select "Start Debugging" (or F5)
+13. Select "Continue" (or F5)
+14. Verify that LED1 is blinking with 0.5 Hz
 
 Setup workspace:
 >west init -l manifest
