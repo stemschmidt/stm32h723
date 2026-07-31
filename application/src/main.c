@@ -1,6 +1,9 @@
 #include <zephyr/drivers/led.h>
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 #include <zephyr/sys/reboot.h>
+
+LOG_MODULE_REGISTER(main);
 
 #define USE_CUSTOM_ERROR_HANDLER 0
 #define DEBUG_FATAL_ERROR_HANDLER 0
@@ -70,7 +73,7 @@ int main(void) {
             led_off(leds, 0);
         }
         led_state = !led_state;
-        printf("LED state: %s\n", led_state ? "ON" : "OFF");
+        LOG_INF("LED state: %s", led_state ? "ON" : "OFF");
         k_msleep(SLEEP_TIME_MS);
     }
 
