@@ -1,3 +1,15 @@
+Make sure that the following Extension are installed in VSCode
+- Microsoft Dev Containers (ms-vscode-remote.remote-containers)
+- Microsoft C/C++ (ms-vscode.cpptools)
+- Microsoft C/C++ DevTools (ms-vscode.cpp-devtools)
+- Microsoft Serial Monitor (ms-vscode.vscode-serial-monitor)
+- marus25 Cortex-Debug (marus25.cortex-debug)
+- mcu-debug debug-tracker-vscode (mcu-debug.debug-tracker-vscode)
+- mcu-debug MemoryView (mcu-debug.memory-view)
+- mcu-debug PeripheralViewer (mcu-debug.peripheral-viewer)
+- mcu-debug RTOS Views (mcu-debug.rtos-views)
+
+
 Initial test of development setup
 To verify that the docker container runs and has access to the debugger on the host:
 1. Launch Ubuntu via wsl2
