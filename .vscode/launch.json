@@ -71,6 +71,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -80,10 +81,6 @@
                 {
                     "description": "Set Disassembly Flavor to Intel",
                     "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                },
-                {
-                    "text": "-gdb-set inferior-tty",
                     "ignoreFailures": true
                 }
             ]
