@@ -15,7 +15,6 @@ manifest:
           - hal_stm32
           - mbedtls
           - mbedtls-3.6
-          - mcuboot
           - segger
           - tf-psa-crypto
           - zephyr
