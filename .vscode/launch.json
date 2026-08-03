@@ -3,7 +3,7 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "showDevDebugOutput":true,
+    "showDevDebugOutput":false,
     "configurations": [
         {
             "name": "Debug application",
@@ -132,6 +132,72 @@
             "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
             "rtos": "Zephyr",
             "runToEntryPoint": "main",
+        },
+        {
+            "name": "Debug Mutex",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
+            "cwd": "${workspaceRoot}",
+            "executable": "examples/kernel/mutex/build/zephyr/zephyr.elf",
+            "interface": "swd",
+            "device": "STM32H723ZG",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "main"
+        },
+        {
+            "name": "Debug Semaphore",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
+            "cwd": "${workspaceRoot}",
+            "executable": "examples/kernel/semaphore/build/zephyr/zephyr.elf",
+            "interface": "swd",
+            "device": "STM32H723ZG",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "main"
+        },
+        {
+            "name": "Debug Uart echo_bot",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "device": "STM32H723ZG",
+            "interface": "swd",
+            "cwd": "${workspaceRoot}",
+            "executable": "zephyr/samples/drivers/uart/echo_bot/build/zephyr/zephyr.elf",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "main"
+        },
+        {
+            "name": "Debug ztest",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/twister-out/unit_testing_unit_testing/host_gnu/examples/ztest-example/tests/src/ztest-example.ubx_checksum/testbinary",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
         },
         {
             "name": "Test environment",
