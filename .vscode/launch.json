@@ -13,19 +13,6 @@
             "gdbTarget": "localhost:3333",
             "device": "STM32H723ZG",
             "interface": "swd",
-            "rttConfig": {
-                "enabled": true,
-                "address": "auto",
-                // "clearSearch": false    // OpenOCD users may have to un-comment this
-                "decoders": [
-                    {
-                        "type": "socket",
-                        "host": "localhost",
-                        "port": 9090,
-                        "label": "RTT Channel 0"
-                    }
-                ]
-            },
             "cwd": "${workspaceRoot}",
             "executable": "application/build/zephyr/zephyr.elf",
             "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
