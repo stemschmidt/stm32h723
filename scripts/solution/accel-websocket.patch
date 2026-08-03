@@ -1,0 +1,246 @@
+diff --git a/samples/net/sockets/http_server/prj.conf b/samples/net/sockets/http_server/prj.conf
+index d03dbda9288..bf57c598435 100644
+--- a/samples/net/sockets/http_server/prj.conf
++++ b/samples/net/sockets/http_server/prj.conf
+@@ -71,3 +71,5 @@ CONFIG_NET_SOCKETS_LOG_LEVEL_DBG=n
+ CONFIG_NET_HTTP_LOG_LEVEL_DBG=n
+ CONFIG_NET_IPV6_LOG_LEVEL_DBG=n
+ CONFIG_NET_IPV6_ND_LOG_LEVEL_DBG=n
++
++CONFIG_SENSOR=y
+diff --git a/samples/net/sockets/http_server/src/static_web_resources/index.html b/samples/net/sockets/http_server/src/static_web_resources/index.html
+index cab5bf6506a..abfbbf9d1da 100644
+--- a/samples/net/sockets/http_server/src/static_web_resources/index.html
++++ b/samples/net/sockets/http_server/src/static_web_resources/index.html
+@@ -61,40 +61,19 @@
+     <p>Below is the device uptime. This demonstrates dynamic handling of a GET request</p>
+     <p id="uptime"></p>
+ 
+-    <h4>Network Statistics</h4>
+-    <p>Below are the network statistics. This demonstrates streaming data from server to client using a websocket.</p>
++    <h4>Acceleration</h4>
+     <table>
+         <tr>
+-            <td>Total bytes received</td>
+-            <td id="bytes_recv"></td>
++            <td>x-axis:</td>
++            <td id="x-axis"></td>
+         </tr>
+         <tr>
+-            <td>Total bytes sent</td>
+-            <td id="bytes_sent"></td>
++            <td>y-axis:</td>
++            <td id="y-axis"></td>
+         </tr>
+         <tr>
+-            <td>IPv6 packets received</td>
+-            <td id="ipv6_pkt_recv"></td>
+-        </tr>
+-        <tr>
+-            <td>IPv6 packets sent</td>
+-            <td id="ipv6_pkt_sent"></td>
+-        </tr>
+-        <tr>
+-            <td>IPv4 packets received</td>
+-            <td id="ipv4_pkt_recv"></td>
+-        </tr>
+-        <tr>
+-            <td>IPv4 packets sent</td>
+-            <td id="ipv4_pkt_sent"></td>
+-        </tr>
+-        <tr>
+-            <td>TCP bytes received</td>
+-            <td id="tcp_bytes_recv"></td>
+-        </tr>
+-        <tr>
+-            <td>TCP bytes sent</td>
+-            <td id="tcp_bytes_sent"></td>
++            <td>z-axis</td>
++            <td id="z-axis"></td>
+         </tr>
+     </table>
+ </body>
+diff --git a/samples/net/sockets/http_server/src/static_web_resources/main.js b/samples/net/sockets/http_server/src/static_web_resources/main.js
+index 1de8c2b79fd..85849d841e7 100644
+--- a/samples/net/sockets/http_server/src/static_web_resources/main.js
++++ b/samples/net/sockets/http_server/src/static_web_resources/main.js
+@@ -60,13 +60,8 @@ window.addEventListener("DOMContentLoaded", (ev) => {
+ 
+ 	ws.onmessage = (event) => {
+ 		const data = JSON.parse(event.data);
+-		setNetStat(data, "bytes_recv");
+-		setNetStat(data, "bytes_sent");
+-		setNetStat(data, "ipv6_pkt_recv");
+-		setNetStat(data, "ipv6_pkt_sent");
+-		setNetStat(data, "ipv4_pkt_recv");
+-		setNetStat(data, "ipv4_pkt_sent");
+-		setNetStat(data, "tcp_bytes_recv");
+-		setNetStat(data, "tcp_bytes_sent");
++		setNetStat(data, "x-axis");
++		setNetStat(data, "y-axis");
++		setNetStat(data, "z-axis");
+ 	}
+ })
+diff --git a/samples/net/sockets/http_server/src/ws.c b/samples/net/sockets/http_server/src/ws.c
+index a8859a577d8..7ac0b2e98b4 100644
+--- a/samples/net/sockets/http_server/src/ws.c
++++ b/samples/net/sockets/http_server/src/ws.c
+@@ -19,6 +19,7 @@
+ #include <zephyr/net/net_mgmt.h>
+ #include <zephyr/net/net_stats.h>
+ #include <zephyr/init.h>
++#include <zephyr/drivers/sensor.h>
+ 
+ #include <zephyr/logging/log.h>
+ LOG_MODULE_DECLARE(net_http_server_sample, LOG_LEVEL_DBG);
+@@ -54,9 +55,9 @@ struct ws_netstats_ctx {
+ 	struct k_work_delayable work;
+ };
+ 
+-K_THREAD_STACK_ARRAY_DEFINE(ws_handler_stack,
+-			    CONFIG_NET_SAMPLE_NUM_WEBSOCKET_HANDLERS,
+-			    STACK_SIZE);
++const struct device *const dev = DEVICE_DT_GET(DT_ALIAS(accel0));
++
++K_THREAD_STACK_ARRAY_DEFINE(ws_handler_stack, CONFIG_NET_SAMPLE_NUM_WEBSOCKET_HANDLERS, STACK_SIZE);
+ static struct k_thread ws_handler_thread[CONFIG_NET_SAMPLE_NUM_WEBSOCKET_HANDLERS];
+ static APP_BMEM bool ws_handler_in_use[CONFIG_NET_SAMPLE_NUM_WEBSOCKET_HANDLERS];
+ 
+@@ -69,11 +70,10 @@ static struct data {
+ 	struct pollfd fds[1];
+ 	char recv_buffer[RECV_BUFFER_SIZE];
+ } config[CONFIG_NET_SAMPLE_NUM_WEBSOCKET_HANDLERS] = {
+-	[0 ... (CONFIG_NET_SAMPLE_NUM_WEBSOCKET_HANDLERS - 1)] = {
++	[0 ...(CONFIG_NET_SAMPLE_NUM_WEBSOCKET_HANDLERS - 1)] = {
+ 		.sock = -1,
+ 		.fds[0].fd = -1,
+-	}
+-};
++	}};
+ 
+ static int get_free_echo_slot(struct data *cfg)
+ {
+@@ -148,10 +148,8 @@ static void ws_echo_handler(void *ptr1, void *ptr2, void *ptr3)
+ 			break;
+ 		}
+ 
+-		received = recv(client,
+-				cfg->recv_buffer + offset,
+-				sizeof(cfg->recv_buffer) - offset,
+-				0);
++		received = recv(client, cfg->recv_buffer + offset,
++				sizeof(cfg->recv_buffer) - offset, 0);
+ 
+ 		if (received == 0) {
+ 			/* Connection closed */
+@@ -171,20 +169,17 @@ static void ws_echo_handler(void *ptr1, void *ptr2, void *ptr3)
+ 		 * buffer is full or there is no more data to read
+ 		 */
+ 		if (offset == sizeof(cfg->recv_buffer) ||
+-		    (recv(client, cfg->recv_buffer + offset,
+-			  sizeof(cfg->recv_buffer) - offset,
++		    (recv(client, cfg->recv_buffer + offset, sizeof(cfg->recv_buffer) - offset,
+ 			  MSG_PEEK | MSG_DONTWAIT) < 0 &&
+ 		     (errno == EAGAIN || errno == EWOULDBLOCK))) {
+ #endif
+ 			ret = sendall(client, cfg->recv_buffer, offset);
+ 			if (ret < 0) {
+-				LOG_ERR("[%d] Failed to send data, closing socket",
+-					slot);
++				LOG_ERR("[%d] Failed to send data, closing socket", slot);
+ 				break;
+ 			}
+ 
+-			LOG_DBG("[%d] Received and replied with %d bytes",
+-				slot, offset);
++			LOG_DBG("[%d] Received and replied with %d bytes", slot, offset);
+ 
+ 			if (++cfg->counter % 1000 == 0U) {
+ 				LOG_INF("[%d] Sent %u packets", slot, cfg->counter);
+@@ -206,48 +201,31 @@ static void ws_echo_handler(void *ptr1, void *ptr2, void *ptr3)
+ static int netstats_collect(char *buf, size_t maxlen)
+ {
+ 	int ret;
+-	struct net_stats data;
+-	uint32_t bytes_recv = 0;
+-	uint32_t bytes_sent = 0;
+-	uint32_t ipv6_recv = 0;
+-	uint32_t ipv6_sent = 0;
+-	uint32_t ipv4_recv = 0;
+-	uint32_t ipv4_sent = 0;
+-	uint32_t tcp_recv = 0;
+-	uint32_t tcp_sent = 0;
+-
+-	net_mgmt(NET_REQUEST_STATS_GET_ALL, NULL, &data, sizeof(data));
++	struct sensor_value data[3];
+ 
+ 	const char *net_stats_json_template = "{"
+-					      "\"bytes_recv\":%u,"
+-					      "\"bytes_sent\":%u,"
+-					      "\"ipv6_pkt_recv\":%u,"
+-					      "\"ipv6_pkt_sent\":%u,"
+-					      "\"ipv4_pkt_recv\":%u,"
+-					      "\"ipv4_pkt_sent\":%u,"
+-					      "\"tcp_bytes_recv\":%u,"
+-					      "\"tcp_bytes_sent\":%u"
++					      "\"x-axis\":%12.6f,"
++					      "\"y-axis\":%12.6f,"
++					      "\"z-axis\":%12.6f"
+ 					      "}";
+ 
+-	bytes_recv = data.bytes.received;
+-	bytes_sent = data.bytes.sent;
+-#if defined(CONFIG_NET_STATISTICS_IPV6)
+-	ipv6_recv = data.ipv6.recv;
+-	ipv6_sent = data.ipv6.sent;
+-#endif
+-#if defined(CONFIG_NET_STATISTICS_IPV4)
+-	ipv4_recv = data.ipv4.recv;
+-	ipv4_sent = data.ipv4.sent;
+-#endif
+-#if defined(CONFIG_NET_STATISTICS_TCP)
+-	tcp_recv = data.tcp.bytes.received;
+-	tcp_sent = data.tcp.bytes.sent;
+-#endif
++	ret = sensor_sample_fetch_chan(dev, SENSOR_CHAN_ACCEL_XYZ);
++	if (ret != 0) {
++		LOG_ERR("sensor_sample_fetch_chan failed with %d", ret);
++		return ret;
++	}
++
++	ret = sensor_channel_get(dev, SENSOR_CHAN_ACCEL_XYZ, data);
++	if (ret != 0) {
++		LOG_ERR("sensor_channel_get failed with %d", ret);
++		return ret;
++	}
++
++	ret = snprintf(buf, maxlen, net_stats_json_template, sensor_value_to_double(&data[0]),
++		       sensor_value_to_double(&data[1]), sensor_value_to_double(&data[2]));
+ 
+-	ret = snprintf(buf, maxlen, net_stats_json_template, bytes_recv, bytes_sent, ipv6_recv,
+-		       ipv6_sent, ipv4_recv, ipv4_sent, tcp_recv, tcp_sent);
+ 	if (ret >= maxlen) {
+-		LOG_ERR("Net stats do not fit in buffer");
++		LOG_ERR("Accel data do not fit in buffer");
+ 		return -ENOSPC;
+ 	}
+ 
+@@ -323,15 +301,11 @@ int ws_echo_setup(int ws_socket, struct http_request_ctx *request_ctx, void *use
+ 
+ 	LOG_INF("[%d] Accepted a Websocket connection", slot);
+ 
+-	k_thread_create(&ws_handler_thread[slot],
+-			ws_handler_stack[slot],
+-			K_THREAD_STACK_SIZEOF(ws_handler_stack[slot]),
+-			ws_echo_handler,
++	k_thread_create(&ws_handler_thread[slot], ws_handler_stack[slot],
++			K_THREAD_STACK_SIZEOF(ws_handler_stack[slot]), ws_echo_handler,
+ 			INT_TO_POINTER(slot), &config[slot], &ws_handler_in_use[slot],
+ 			THREAD_PRIORITY,
+-			IS_ENABLED(CONFIG_USERSPACE) ? K_USER |
+-						       K_INHERIT_PERMS : 0,
+-			K_NO_WAIT);
++			IS_ENABLED(CONFIG_USERSPACE) ? K_USER | K_INHERIT_PERMS : 0, K_NO_WAIT);
+ 
+ 	if (IS_ENABLED(CONFIG_THREAD_NAME)) {
+ #define MAX_NAME_LEN (sizeof("ws[xxxxxxxxxx]"))
