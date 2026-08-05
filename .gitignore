@@ -1,6 +1,7 @@
 /application/build/
 /examples/kernel/mutex/build/
 /examples/kernel/semaphore/build/
+/examples/superloop/build/
 /modules/
 /zephyr/
 /.west/
