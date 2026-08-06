@@ -3,18 +3,21 @@
 #include <zephyr/drivers/led.h>
 #include <zephyr/kernel.h>
 #include <zephyr/random/random.h>
+#if defined(CONFIG_INPUT)
+#include <zephyr/input/input.h>
+#endif
 
 #define NUM_LEDS 3
-
-static const struct gpio_dt_spec user_button = GPIO_DT_SPEC_GET(DT_ALIAS(sw0), gpios);
 
 #define LED_STACK_SIZE 1024
 #define LED_PRIORITY 5
 #define BUTTON_STACK_SIZE 1024
 #define BUTTON_PRIORITY 5
 
+#if !defined(CONFIG_INPUT)
 static K_THREAD_STACK_DEFINE(button_stack_area, BUTTON_STACK_SIZE);
 static struct k_thread button_thread_data;
+#endif
 
 static bool run_perform_task = false;
 static int current_period_ms = 500;
@@ -49,7 +52,24 @@ static void on_button_release(int64_t current_ms) {
     }
 }
 
-static void get_button_state(int64_t current_ms) {
+#if defined(CONFIG_INPUT)
+
+static void key_press(struct input_event* evt, void* user_data) {
+    if (evt->code == INPUT_KEY_0) {
+        int64_t current_ms = k_uptime_get();
+        if (evt->value == 1) {
+            on_button_press(current_ms);
+        } else {
+            on_button_release(current_ms);
+        }
+    }
+}
+
+INPUT_CALLBACK_DEFINE(NULL, key_press, NULL);
+
+#else  // #if defined(CONFIG_INPUT)
+
+static void get_button_state(const struct gpio_dt_spec* user_button, int64_t current_ms) {
     static int64_t last_time = 0;
     static uint8_t button_state = 0;
 
@@ -61,7 +81,7 @@ static void get_button_state(int64_t current_ms) {
 
         button_state = (button_state << 1);
         /* check button state and debounce it. */
-        if (gpio_pin_get_dt(&user_button)) {
+        if (gpio_pin_get_dt(user_button)) {
             button_state |= 0x01;
         }
 
@@ -83,14 +103,25 @@ static void button_thread(void* arg1, void* arg2, void* arg3) {
     ARG_UNUSED(arg2);
     ARG_UNUSED(arg3);
 
+    const struct gpio_dt_spec user_button = GPIO_DT_SPEC_GET(DT_ALIAS(sw0), gpios);
+    if (!device_is_ready(user_button.port)) {
+        printk("button is not ready! Terminate\n");
+        return;
+    }
+
+    /* configure button as input. */
+    gpio_pin_configure_dt(&user_button, GPIO_INPUT);
+
     int64_t milliseconds = 0;
 
     while (true) {
         milliseconds = k_uptime_get();
-        get_button_state(milliseconds);
+        get_button_state(&user_button, milliseconds);
         k_sleep(K_MSEC(10));
     }
 }
+
+#endif  // #if defined(CONFIG_INPUT)
 
 static void update_led(const struct device* leds) {
     static int current = 0;
@@ -134,23 +165,16 @@ static void perform_task(void) {
 }
 
 int main(void) {
-    int64_t milliseconds = 0;
-
+#if !defined(CONFIG_INPUT)
     k_tid_t button_thread_id =
         k_thread_create(&button_thread_data, button_stack_area, K_THREAD_STACK_SIZEOF(button_stack_area), button_thread,
                         NULL, NULL, NULL, BUTTON_PRIORITY, 0, K_NO_WAIT);
-
-    if (!device_is_ready(user_button.port)) {
-        return -1;
-    }
-
-    /* configure button as input. */
-    gpio_pin_configure_dt(&user_button, GPIO_INPUT);
+#endif
+    int64_t milliseconds = 0;
 
     while (1) {
         milliseconds = k_uptime_get();
 
-        get_button_state(milliseconds);
         if (run_perform_task) {
             perform_task();
         }
