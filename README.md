@@ -33,6 +33,9 @@ west update
 
 Build application and samples (all in the VSCode terminal in the docker container):
 
+Before building an application, some environment variables have to be set. Invoke "user@INV0002:/workspaces/stm32h723$ source zephyr/zephyr-env.sh" every time after starting the docker container or opening a terminal!
+One of the variables is ZEPHYR_BASE which is used in the top level CMakeLists.txt : find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+
 in application/
 west build -p -b nucleo_h723zg -- -DEXTRA_CONF_FILE=/workspaces/stm32h723/scripts/debug/nucleo_h723zg.conf
 
