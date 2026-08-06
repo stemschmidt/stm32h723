@@ -1,0 +1,12 @@
+/ {
+	/* do not define the leds on the pa5 and pb14 but pwmleds */
+	leds {
+		status = "disabled";
+	};
+};
+
+&{/pwmleds} {
+	/* NOTE: enable here because it is disabled by default */
+	status = "okay";
+};
+

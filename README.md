@@ -39,8 +39,8 @@ One of the variables is ZEPHYR_BASE which is used in the top level CMakeLists.tx
 in application/
 west build -p -b nucleo_h723zg -- -DEXTRA_CONF_FILE=/workspaces/stm32h723/scripts/debug/nucleo_h723zg.conf
 
-in zephyr/samples/ directory
-west build -p -b nucleo_h723zg -- -DEXTRA_CONF_FILE=/workspaces/stm32h723/scripts/debug/nucleo_h723zg.conf
+in zephyr/samples/drivers/led/pwm
+west build -p -b nucleo_h723zg -- -DEXTRA_CONF_FILE=/workspaces/stm32h723/scripts/debug/nucleo_h723zg.conf -DEXTRA_DTC_OVERLAY_FILE=/workspaces/stm32h723/scripts/overlay/led_pwm.overlay
 
 in zephyr/samples/net/dhcpv4_client
 west build -p -b nucleo_h723zg -- -DEXTRA_CONF_FILE="workspaces/stm32h723/scripts/debug/gdb_support.conf;/workspaces/stm32h723/scripts/debug/nucleo_h723zg.conf"
@@ -50,6 +50,9 @@ west build -p -b nucleo_h723zg -- -DEXTRA_CONF_FILE="overlay-dhcpv4.conf;/worksp
 
 in zephyr/samples/sensor/accel_trig:
 west build -p -b nucleo_h723zg  -- -DEXTRA_DTC_OVERLAY_FILE=/workspaces/stm32h723/scripts/overlay/adxl345.overlay -DEXTRA_CONF_FILE="/workspaces/stm32h723/scripts/overlay/adxl345.conf;/workspaces/stm32h723/scripts/debug/nucleo_h723zg.conf"
+
+For other samples, in zephyr/samples/ directory
+west build -p -b nucleo_h723zg -- -DEXTRA_CONF_FILE=/workspaces/stm32h723/scripts/debug/nucleo_h723zg.conf
 
 Launch openocd (from https://github.com/xpack-dev-tools/openocd-xpack/releases/tag/v0.12.0-7)
 PS C:\Users\konta> openocd.exe  -f \\wsl$\Ubuntu\home\stefan\Projects\stm32h723\scripts\debug\stm32h723zg_openocd.cfg
