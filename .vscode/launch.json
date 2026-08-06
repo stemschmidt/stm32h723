@@ -191,6 +191,20 @@
             "runToEntryPoint": "main"
         },
         {
+            "name": "Debug sensor shell",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "device": "STM32H723ZG",
+            "interface": "swd",
+            "cwd": "${workspaceRoot}",
+            "executable": "zephyr/samples/sensor/sensor_shell/build/zephyr/zephyr.elf",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "main",
+        },
+        {
             "name": "Debug ztest",
             "type": "cppdbg",
             "request": "launch",
