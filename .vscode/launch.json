@@ -76,10 +76,10 @@
             "runToEntryPoint": "main",
         },
         {
-            "name": "Debug blinky on native-sim",
+            "name": "Debug application on native-sim",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/workspaces/stm32h723/zephyr/samples/basic/blinky/build/zephyr/zephyr.exe",
+            "program": "/workspaces/stm32h723/application/build/zephyr/zephyr.exe",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
@@ -99,23 +99,6 @@
                     "ignoreFailures": true
                 }
             ]
-        },
-        {
-            "name": "Debug dhcp",
-            "type": "cortex-debug",
-            "request": "launch",
-            "servertype": "external",
-            "gdbTarget": "localhost:3333",
-            "device": "STM32H723ZG",
-            "interface": "swd",
-            "cwd": "${workspaceRoot}",
-            "executable": "zephyr/samples/net/dhcpv4_client/build/zephyr/zephyr.elf",
-            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32H7x3.svd",
-            "rtos": "Zephyr",
-            "runToEntryPoint": "",
-            "postRestartCommands": [
-                "continue"
-            ],
         },
         {
             "name": "Debug http_server",
@@ -227,6 +210,20 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "Demonstrate SystemView",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:2331",
+            "device": "STM32F411RE",
+            "interface": "swd",
+            "cwd": "${workspaceRoot}",
+            "executable": "application/build/zephyr/zephyr.elf",
+            "svdFile": "modules/debug/cmsis-svd/data/STMicro/STM32F411.svd",
+            "rtos": "Zephyr",
+            "runToEntryPoint": "main",
         },
         {
             "name": "Test environment",
