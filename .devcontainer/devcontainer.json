@@ -8,8 +8,6 @@
             "extensions": [
                 "ms-vscode.cpptools",
                 "ms-vscode.cmake-tools",
-                "twxs.cmake",
-                "ms-python.python",
                 "mcu-debug.debug-tracker-vscode",
                 "mcu-debug.memory-view",
                 "mcu-debug.rtos-views",
